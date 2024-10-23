@@ -1,0 +1,47 @@
+#!/bin/bash
+# Update the system
+sudo yum update -y
+
+# Install Apache (HTTPD)
+sudo yum install -y httpd
+sudo systemctl start httpd
+sudo systemctl enable httpd
+
+# Install PHP and necessary modules
+sudo amazon-linux-extras enable php7.4
+sudo yum clean metadata
+sudo yum install -y php php-mysqlnd
+
+# Modify Apache configuration to prioritize index.php
+sudo sed -i 's/DirectoryIndex index.html/DirectoryIndex index.php index.html/' /etc/httpd/conf/httpd.conf
+
+# Restart Apache after configuration changes
+sudo systemctl restart httpd
+
+# Install CodeDeploy agent
+sudo yum install -y ruby
+cd /home/ec2-user
+wget https://bucket-name.s3.us-east-2.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+
+# Ensure the CodeDeploy agent is running
+sudo systemctl start codedeploy-agent
+sudo systemctl enable codedeploy-agent
+
+# Add ec2-user to the apache group to manage web files
+sudo usermod -a -G apache ec2-user
+sudo chown -R ec2-user:apache /var/www
+sudo chmod 2775 /var/www
+find /var/www -type d -exec sudo chmod 2775 {} \;
+find /var/www -type f -exec sudo chmod 0664 {} \;
+
+# Restart Apache to apply permissions
+sudo systemctl restart httpd
+
+# Enable firewall for HTTP/HTTPS if required
+# sudo yum install -y firewalld
+# sudo systemctl start firewalld
+# sudo firewall-cmd --add-service=http --permanent
+# sudo firewall-cmd --add-service=https --permanent
+# sudo firewall-cmd --reload
