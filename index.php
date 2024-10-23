@@ -52,7 +52,7 @@
 // Check if the form has been submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Database connection credentials
-    $servername = "";
+    $servername = "database-2.ct26eguu6eop.us-east-1.rds.amazonaws.com";
     $username = "admin";
     $password = "AppleOrangeMango";
     $dbname = "user_information"; // Replace with your database name
